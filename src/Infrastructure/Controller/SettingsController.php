@@ -7,6 +7,7 @@ namespace App\Infrastructure\Controller;
 use App\Infrastructure\Dto\ConfirmCodeDto;
 use App\Infrastructure\Dto\SendCodeDto;
 use App\Infrastructure\Service\ChangeSettingsConfirmService;
+use http\Client\Response;
 use HttpResponseException;
 use Throwable;
 
@@ -17,6 +18,28 @@ class SettingsController
     public function __construct(ChangeSettingsConfirmService $changeSettingsConfirmService)
     {
         $this->changeSettingsConfirmService = $changeSettingsConfirmService;
+    }
+
+    /**
+     * @throws HttpResponseException
+     *
+     * Условный Маппинг
+     */
+    public function process(): Response
+    {
+        $methodName = 'sendConfirmationCode';
+
+        if (method_exists($this, $methodName) === true) {
+            $parameters = $this->{$methodName}();
+        } else {
+            throw new HttpResponseException('method not found');
+        }
+
+        $response = new Response();
+        $response->setBody($parameters);
+        $response->setResponseCode(200);
+
+        return $response;
     }
 
     /**
